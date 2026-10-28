@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>House Explorer: Parts of the House - Fase D SMP</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .floating-anim {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+      50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.8); }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOP HEADER / NAV -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 px-4 py-3 shadow-sm">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Title & Creator Info -->
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 bg-gradient-to-tr from-indigo-600 to-sky-400 rounded-2xl flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i class="fa-solid fa-house-chimney text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-bold bg-gradient-to-r from-indigo-700 to-blue-600 bg-clip-text text-transparent leading-tight">
+            HouseQuest: Parts of the House
+          </h1>
+          <p class="text-xs text-slate-500 font-medium flex items-center gap-1">
+            <span>Fase D (SMP)</span> • 
+            <span class="text-indigo-600 font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-chalkboard-user text-[11px]"></i> Jamaluddin - UPTD SMPN 2 Robatal
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Gamification Stats (EXP, Coins, Streak) -->
+      <div class="flex items-center gap-2 md:gap-4 bg-slate-50 border border-slate-200 py-1.5 px-3 rounded-full text-xs md:text-sm font-semibold">
+        <div class="flex items-center gap-1.5 text-amber-600">
+          <i class="fa-solid fa-coins text-amber-500 animate-spin-slow"></i>
+          <span id="playerCoins">120</span> <span class="hidden sm:inline text-[11px] text-slate-400 font-normal">Koin</span>
+        </div>
+        <div class="h-4 w-px bg-slate-300"></div>
+        <div class="flex items-center gap-1.5 text-indigo-600">
+          <i class="fa-solid fa-star text-indigo-500"></i>
+          <span id="playerExp">350</span> <span class="text-[11px] text-slate-400 font-normal">XP</span>
+        </div>
+        <div class="h-4 w-px bg-slate-300"></div>
+        <div class="flex items-center gap-1.5 text-orange-500">
+          <i class="fa-solid fa-fire text-orange-500"></i>
+          <span id="playerRankBadge" class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">Lvl 1</span>
+        </div>
+        <div class="h-4 w-px bg-slate-300"></div>
+        <button id="toggleAudioBtn" onclick="toggleMute()" class="text-slate-600 hover:text-indigo-600 transition-colors p-1" title="Toggle Sound Effect">
+          <i id="audioIcon" class="fa-solid fa-volume-high"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="max-w-6xl mx-auto w-full px-4 pt-4">
+    <div class="flex bg-slate-200/80 p-1.5 rounded-2xl gap-1 overflow-x-auto text-xs sm:text-sm font-semibold">
+      <button onclick="switchTab('adventure')" id="tab-adventure" class="tab-btn flex-1 py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-md font-bold">
+        <i class="fa-solid fa-map-location-dot"></i>
+        <span>⭐ Adventure Quest</span>
+      </button>
+      <button onclick="switchTab('explore')" id="tab-explore" class="tab-btn flex-1 py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-indigo-600">
+        <i class="fa-solid fa-magnifying-glass-location"></i>
+        <span>1. Room Explorer</span>
+      </button>
+      <button onclick="switchTab('match')" id="tab-match" class="tab-btn flex-1 py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-indigo-600">
+        <i class="fa-solid fa-gamepad"></i>
+        <span>2. Speed Quiz</span>
+      </button>
+      <button onclick="switchTab('decor')" id="tab-decor" class="tab-btn flex-1 py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-indigo-600">
+        <i class="fa-solid fa-cubes-stacked"></i>
+        <span>3. Room Decorator</span>
+      </button>
+      <button onclick="switchTab('exam')" id="tab-exam" class="tab-btn flex-1 py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-indigo-600">
+        <i class="fa-solid fa-award"></i>
+        <span>4. Assessment</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="max-w-6xl mx-auto w-full p-4 flex-1">
+
+    <!-- ==================== TAB 0: PROFESSIONAL ADVENTURE QUEST (LEVELING MAP) ==================== -->
+    <section id="view-adventure" class="tab-view block space-y-5">
+      <!-- Player Profile & Mission Banner -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 shadow-xl border border-indigo-500/20 relative overflow-hidden">
+        <div class="absolute right-0 top-0 translate-x-10 -translate-y-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="flex items-center gap-4">
+            <div class="relative">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-400 to-indigo-500 p-0.5 shadow-lg shadow-indigo-500/30">
+                <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center text-3xl" id="avatarEmoji">
+                  🕵️‍♂️
+                </div>
+              </div>
+              <span id="rankLevelPill" class="absolute -bottom-2 -right-2 bg-amber-400 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full border-2 border-slate-900 shadow">
+                LVL 1
+              </span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl font-bold tracking-tight" id="playerNameDisplay">Inspector Junior</h2>
+                <span id="playerTitleTag" class="text-[11px] bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 px-2.5 py-0.5 rounded-full font-semibold">Trainee</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">Selesaikan setiap level ruangan untuk mendapatkan bintang dan membuka stage selanjutnya!</p>
+              <!-- EXP Bar -->
+              <div class="w-56 bg-slate-800 rounded-full h-2 mt-2 overflow-hidden border border-slate-700">
+                <div id="advExpBar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 35%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Stars & Badges -->
+          <div class="flex items-center gap-3">
+            <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2.5 text-center">
+              <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Bintang</div>
+              <div class="text-xl font-black text-amber-300 flex items-center justify-center gap-1">
+                <i class="fa-solid fa-star text-amber-400"></i>
+                <span id="totalStarsEarned">0</span> / 15
+              </div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2.5 text-center">
+              <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Status Misi</div>
+              <div class="text-sm font-bold text-emerald-400" id="campaignStatus">Level 1 Active</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level Map & Stage Progression Path -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-route text-indigo-600"></i> Level World Map: "The House Mystery"
+            </h3>
+            <p class="text-xs text-slate-500">Raih minimal 2 Bintang di setiap stage untuk membuka level berikutnya.</p>
+          </div>
+          <button onclick="resetCampaignProgress()" class="text-xs text-slate-400 hover:text-rose-600 flex items-center gap-1 transition">
+            <i class="fa-solid fa-arrows-rotate"></i> Reset Progress
+          </button>
+        </div>
+
+        <!-- Levels Progression Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4" id="stagesMapContainer">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Achievements / Badges Trophy Room -->
+        <div class="mt-8 pt-6 border-t border-slate-100">
+          <h4 class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-trophy text-amber-500"></i> Inspector Badges & Trophies
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="badgesContainer">
+            <!-- Badges populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Stage Mission Modal / Viewport -->
+      <div id="stageGameplayModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+          <!-- Mission Top Header -->
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+              <span id="stagePlayIcon" class="text-3xl">🏡</span>
+              <div>
+                <span id="stagePlayTag" class="text-[10px] font-black uppercase text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">LEVEL 1</span>
+                <h4 id="stagePlayTitle" class="text-base font-bold text-slate-800">Mission Title</h4>
+              </div>
+            </div>
+            <button onclick="closeStageModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Mission Gameplay Body -->
+          <div id="stagePlayBody" class="space-y-4">
+            <!-- Stage Question & Scenario -->
+            <div class="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+              <div class="flex items-center justify-between text-xs text-indigo-700 font-semibold mb-1">
+                <span id="stageStepCounter">Pertanyaan 1 dari 3</span>
+                <span class="flex items-center gap-1 text-amber-600 font-bold">
+                  <i class="fa-solid fa-stopwatch"></i> <span id="stageTimerDisplay">15s</span>
+                </span>
+              </div>
+              <p id="stageMissionPrompt" class="text-sm font-semibold text-slate-800 leading-relaxed">
+                Prompt teks misi.
+              </p>
+            </div>
+
+            <!-- Visual Clue / Audio Prompt -->
+            <div id="stageClueContainer" class="flex justify-center items-center py-2">
+              <!-- Clues injected here -->
+            </div>
+
+            <!-- Choices -->
+            <div id="stageChoicesGrid" class="grid grid-cols-1 gap-2.5">
+              <!-- Dynamically injected choices -->
+            </div>
+          </div>
+
+          <!-- Stage Mission Complete View -->
+          <div id="stageCompleteView" class="hidden text-center py-4 space-y-4">
+            <div id="stageResultStars" class="text-4xl space-x-1 text-amber-400">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <h3 id="stageResultTitle" class="text-xl font-black text-slate-800">Stage Clear!</h3>
+            <p id="stageResultDesc" class="text-xs text-slate-500 max-w-sm mx-auto">
+              Kamu telah menyelesaikan inspeksi misi ini dengan sangat baik.
+            </p>
+            <div class="bg-amber-50 border border-amber-200/60 rounded-2xl p-3 max-w-xs mx-auto flex items-center justify-around text-xs font-bold text-amber-800">
+              <div>XP Didapat: <span class="text-indigo-600" id="stageAwardExp">+50 XP</span></div>
+              <div class="w-px h-5 bg-amber-200"></div>
+              <div>Koin: <span class="text-amber-600" id="stageAwardCoins">+20</span></div>
+            </div>
+            <div class="pt-2 flex justify-center gap-3">
+              <button onclick="closeStageModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md transition">
+                Kembali ke Map
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 1: ROOM EXPLORER ==================== -->
+    <section id="view-explore" class="tab-view block space-y-4">
+      <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+          <div>
+            <span class="text-xs uppercase font-extrabold tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+              Vocabulary & Listening Practice
+            </span>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800 mt-2">Interactive Virtual House</h2>
+            <p class="text-sm text-slate-500">Pilih salah satu ruangan untuk mendengarkan pelafalan bahasa Inggris dan mempelajari benda-benda di dalamnya.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-200 font-medium">
+              <i class="fa-solid fa-circle-info mr-1"></i> Klik kartu kosakata untuk mendengar audio!
+            </span>
+          </div>
+        </div>
+
+        <!-- Room Selector Grid Buttons -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 mb-6" id="roomButtonsContainer">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Room Display Showcase -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <!-- Room Visual & Overview -->
+          <div class="lg:col-span-5 bg-gradient-to-b from-indigo-50/70 to-slate-50 rounded-2xl p-5 border border-indigo-100/60 flex flex-col items-center text-center">
+            <div id="roomEmoji" class="text-7xl mb-3 floating-anim filter drop-shadow">🛋️</div>
+            <h3 id="roomTitle" class="text-2xl font-extrabold text-indigo-950">Living Room</h3>
+            <p id="roomTranslation" class="text-xs text-indigo-600 font-semibold mb-2">Ruang Tamu / Ruang Keluarga</p>
+            <p id="roomDescription" class="text-xs text-slate-600 leading-relaxed max-w-sm mb-4">
+              A room in a house for general and everyday use, like entertaining guests, reading, or watching television.
+            </p>
+            <button onclick="speakCurrentRoom()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-md shadow-indigo-200 transition-all">
+              <i class="fa-solid fa-volume-high"></i> Pronounce Room
+            </button>
+          </div>
+
+          <!-- Things in the Room (Vocabulary Cards) -->
+          <div class="lg:col-span-7">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-indigo-500"></i> Things in this Room (Kosakata Benda)
+              </h4>
+              <span id="vocabCounter" class="text-xs font-semibold text-slate-400">5 Items</span>
+            </div>
+            <div id="vocabListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: SPEED MATCH QUIZ ==================== -->
+    <section id="view-match" class="tab-view hidden space-y-4">
+      <div class="bg-white rounded-3xl p-5 md:p-8 shadow-sm border border-slate-200/80 max-w-2xl mx-auto">
+        <!-- Quiz Header Info -->
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Speed Challenge</div>
+              <div class="text-base font-bold text-slate-800">Tebak Ruangan & Fungsi</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1 text-rose-500 font-bold" id="quizLives">
+              <i class="fa-solid fa-heart text-base"></i>
+              <i class="fa-solid fa-heart text-base"></i>
+              <i class="fa-solid fa-heart text-base"></i>
+            </div>
+            <div class="bg-indigo-50 px-3 py-1 rounded-xl text-indigo-700 font-bold text-sm" id="quizScoreBadge">
+              Skor: 0
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Screen Start -->
+        <div id="quizStartScreen" class="text-center py-6 space-y-4">
+          <div class="text-6xl mb-2 floating-anim">🎯</div>
+          <h3 class="text-xl font-bold text-slate-800">Siap Uji Ketangkasan Bahasa Inggris?</h3>
+          <p class="text-xs md:text-sm text-slate-500 max-w-md mx-auto">
+            Jawab pertanyaan seputar nama ruangan dan perabot rumah tangga secepat mungkin. Kamu punya 3 nyawa dan 15 detik per soal!
+          </p>
+          <div class="pt-3">
+            <button onclick="startQuiz()" class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold px-8 py-3 rounded-2xl shadow-lg shadow-indigo-300 hover:scale-105 active:scale-95 transition-all">
+              <i class="fa-solid fa-play mr-2"></i> Mulai Kuis Sekarang
+            </button>
+          </div>
+        </div>
+
+        <!-- Quiz Active Game View -->
+        <div id="quizPlayScreen" class="hidden space-y-5">
+          <!-- Timer Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+            <div id="quizTimerBar" class="bg-gradient-to-r from-amber-400 to-rose-500 h-2.5 rounded-full transition-all duration-1000 w-full"></div>
+          </div>
+
+          <!-- Question Box -->
+          <div class="bg-slate-50 border border-slate-200/70 rounded-2xl p-4 text-center">
+            <span id="questionCategory" class="text-[11px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-100/60 px-2 py-0.5 rounded-md">Function of Room</span>
+            <p id="quizQuestionText" class="text-base md:text-lg font-bold text-slate-800 mt-2">
+              "We take a bath, wash our face, and brush our teeth in this room. What is it?"
+            </p>
+          </div>
+
+          <!-- Answer Option Buttons -->
+          <div id="quizOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <!-- Dynamically generated buttons -->
+          </div>
+
+          <div class="flex justify-between items-center text-xs text-slate-400 pt-2">
+            <span id="quizQuestionNumber">Pertanyaan 1 dari 8</span>
+            <span>+10 Poin per jawaban benar</span>
+          </div>
+        </div>
+
+        <!-- Quiz Over Screen -->
+        <div id="quizEndScreen" class="hidden text-center py-6 space-y-4">
+          <div id="quizResultIcon" class="text-6xl mb-2">🏆</div>
+          <h3 id="quizResultTitle" class="text-xl font-bold text-slate-800">Hebat Sekali!</h3>
+          <p id="quizResultDesc" class="text-sm text-slate-500 max-w-sm mx-auto">
+            Kamu berhasil menyelesaikan Speed Match Quiz dengan nilai mengagumkan.
+          </p>
+          <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 max-w-xs mx-auto">
+            <div class="text-xs text-indigo-600 font-semibold">Total Skor Akhir</div>
+            <div class="text-3xl font-black text-indigo-800" id="quizFinalScore">80</div>
+          </div>
+          <div class="pt-2 flex justify-center gap-3">
+            <button onclick="startQuiz()" class="bg-indigo-600 text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md hover:bg-indigo-700 transition-all">
+              <i class="fa-solid fa-rotate-right mr-1"></i> Main Lagi
+            </button>
+            <button onclick="switchTab('decor')" class="bg-slate-100 text-slate-700 text-xs font-bold px-6 py-3 rounded-xl hover:bg-slate-200 transition-all">
+              Tantangan Berikutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: ROOM DECORATOR (DRAG & DROP) ==================== -->
+    <section id="view-decor" class="tab-view hidden space-y-4">
+      <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-slate-200/80">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+          <div>
+            <span class="text-xs uppercase font-extrabold tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+              Categorization Mini-Game
+            </span>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800 mt-2">Tidy Up The House!</h2>
+            <p class="text-sm text-slate-500">Pindahkan perabot rumah tangga yang berantakan ke dalam ruangan yang tepat.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="resetDecoratorGame()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-2 rounded-xl transition">
+              <i class="fa-solid fa-arrow-rotate-left mr-1"></i> Acak Ulang Benda
+            </button>
+          </div>
+        </div>
+
+        <!-- Inventory of items to place -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300 mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <i class="fa-solid fa-box-open mr-1 text-amber-500"></i> Kotak Perabot (Klik benda lalu klik ruangan tujuan):
+            </span>
+            <span id="decorItemsRemaining" class="text-xs font-bold text-indigo-600">6 Benda tersisa</span>
+          </div>
+          <div id="unplacedItemsBox" class="flex flex-wrap gap-2 min-h-[50px] items-center">
+            <!-- Dynamic Items -->
+          </div>
+        </div>
+
+        <!-- Target Rooms Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="targetRoomsContainer">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: SUMMATIVE ASSESSMENT & CERTIFICATE ==================== -->
+    <section id="view-exam" class="tab-view hidden space-y-4">
+      <div class="bg-white rounded-3xl p-5 md:p-8 shadow-sm border border-slate-200/80 max-w-3xl mx-auto">
+        <!-- Assessment Intro -->
+        <div id="examIntroSection" class="space-y-5">
+          <div class="border-b border-slate-100 pb-4">
+            <span class="text-xs uppercase font-extrabold tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+              Evaluasi Akhir Fase D
+            </span>
+            <h2 class="text-2xl font-black text-slate-800 mt-2">Asesmen Kompetensi Siswa</h2>
+            <p class="text-xs md:text-sm text-slate-500">Uji pemahaman akhir materi Parts of the House, Prepositions of Place, dan Descriptive Function. Nilai dan e-sertifikat dapat langsung diunduh/dicetak.</p>
+          </div>
+
+          <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 space-y-3">
+            <label class="block text-xs font-bold text-indigo-900">Masukkan Nama Siswa:</label>
+            <input type="text" id="studentNameInput" placeholder="Contoh: Siti Nurhaliza / Ahmad Pratama" class="w-full bg-white px-4 py-2.5 rounded-xl border border-indigo-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Kelas:</label>
+                <input type="text" id="studentClassInput" value="VII - A (SMP)" class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-400 outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Sekolah:</label>
+                <input type="text" id="studentSchoolInput" value="UPTD SMPN 2 Robatal" class="w-full bg-white px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-400 outline-none">
+              </div>
+            </div>
+          </div>
+
+          <button onclick="startExam()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.99] flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-signature"></i> Kerjakan Soal Evaluasi (10 Butir)
+          </button>
+        </div>
+
+        <!-- Assessment Form Section -->
+        <div id="examFormSection" class="hidden space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 class="font-bold text-slate-800 text-base" id="examCandidateName">Nama Siswa: -</h3>
+              <p class="text-xs text-slate-400">Pilihlah salah satu jawaban (A, B, C, atau D) yang paling tepat!</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">10 Soal PG</span>
+            </div>
+          </div>
+
+          <!-- Questions Container -->
+          <div id="examQuestionsList" class="space-y-6">
+            <!-- Injected by JavaScript -->
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <button onclick="cancelExam()" class="text-xs text-slate-500 hover:text-slate-800 font-semibold px-4 py-2">
+              Batal
+            </button>
+            <button onclick="submitExam()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs md:text-sm px-6 py-3 rounded-xl shadow-md shadow-emerald-200 transition-all flex items-center gap-2">
+              <i class="fa-solid fa-check-double"></i> Selesai & Hitung Nilai
+            </button>
+          </div>
+        </div>
+
+        <!-- Assessment Result & Certificate Card -->
+        <div id="examResultSection" class="hidden space-y-6">
+          <!-- Digital Certificate Container -->
+          <div id="printableCertificate" class="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white p-6 md:p-8 rounded-3xl shadow-xl relative overflow-hidden border-4 border-amber-400/40">
+            <!-- Certificate watermark pattern -->
+            <div class="absolute -right-12 -bottom-12 text-white/5 text-9xl font-black pointer-events-none">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            
+            <div class="text-center space-y-3 relative z-10">
+              <div class="flex justify-center items-center gap-2">
+                <span class="h-0.5 w-12 bg-amber-400"></span>
+                <span class="text-amber-400 uppercase tracking-widest text-xs font-black">Certificate of Achievement</span>
+                <span class="h-0.5 w-12 bg-amber-400"></span>
+              </div>
+              <h3 class="text-2xl md:text-3xl font-extrabold text-white tracking-wide">SURAT KELULUSAN MODUL</h3>
+              <p class="text-xs text-slate-300">Diberikan sebagai pengakuan kompetensi materi Bahasa Inggris Fase D:</p>
+              
+              <div class="py-2">
+                <div class="text-xl md:text-2xl font-black text-amber-300 border-b-2 border-amber-400/50 inline-block px-6 pb-1" id="certStudentName">
+                  Nama Siswa
+                </div>
+                <div class="text-xs text-slate-300 mt-1" id="certStudentClass">Kelas & Asal Sekolah</div>
+              </div>
+
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 max-w-sm mx-auto grid grid-cols-2 gap-2 text-center border border-white/15 my-2">
+                <div>
+                  <span class="text-[10px] text-slate-300 block uppercase">Nilai Akhir</span>
+                  <span class="text-2xl font-black text-emerald-400" id="certFinalGrade">100</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-300 block uppercase">Predikat</span>
+                  <span class="text-2xl font-black text-amber-300" id="certPredicate">SANGAT BAIK</span>
+                </div>
+              </div>
+
+              <p class="text-[11px] text-slate-300 italic pt-1">
+                "Telah menguasai kompetensi deskripsi ruang dan perabot rumah tangga (Parts of House) sesuai Kurikulum Merdeka."
+              </p>
+
+              <!-- Footer signatory -->
+              <div class="pt-6 flex justify-between items-end border-t border-white/10 text-left text-xs">
+                <div>
+                  <div class="text-[10px] text-slate-400">Media Pembelajaran:</div>
+                  <div class="font-bold text-slate-200">HouseQuest English v2.0</div>
+                  <div class="text-[10px] text-slate-400" id="certDateDisplay">Tanggal: 28 Oktober 2026</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] text-slate-400">Guru Mata Pelajaran:</div>
+                  <div class="font-bold text-amber-300 text-sm">Jamaluddin</div>
+                  <div class="text-[10px] text-slate-300">UPTD SMPN 2 Robatal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-2 shadow-sm">
+              <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+            </button>
+            <button onclick="retakeExam()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-2">
+              <i class="fa-solid fa-redo"></i> Ulangi Evaluasi
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TEACHER / CREATOR FOOTER -->
+  <footer class="bg-white border-t border-slate-200 mt-8 py-4 px-4 text-center">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <div class="flex items-center gap-2 font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-ping"></span>
+        Media Interaktif Kurikulum Merdeka • Bahasa Inggris Fase D
+      </div>
+      <div>
+        Dikembangkan oleh: <span class="font-bold text-indigo-700">Jamaluddin</span> | Guru <span class="font-semibold text-slate-700">UPTD SMPN 2 Robatal</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CUSTOM FEEDBACK MODAL (NO ALERT) -->
+  <div id="feedbackModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl transform transition-all scale-95 duration-200" id="feedbackBox">
+      <div id="modalIcon" class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl mb-2">
+        ✨
+      </div>
+      <h4 id="modalTitle" class="text-xl font-bold text-slate-800">Pemberitahuan</h4>
+      <p id="modalMessage" class="text-xs text-slate-500 leading-relaxed">Pesan interaktif.</p>
+      <button onclick="closeModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md">
+        Mengerti
+      </button>
+    </div>
+  </div>
+
+  <!-- SCRIPT DATA & GAME LOGIC -->
+  <script>
+    /* ==========================================================
+       1. GLOBAL STATE & SOUND SYNTHESIZER (Tone / Web Audio)
+       ========================================================== */
+    let isMuted = false;
+    let coins = 120;
+    let exp = 350;
+
+    // Web Audio Synthesizer for reliable sound without external files
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(250, now);
+          osc.frequency.linearRampToValueAtTime(130, now + 0.25);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'click') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'fanfare') {
+          // Victory arpeggio
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const subOsc = ctx.createOscillator();
+            const subGain = ctx.createGain();
+            subOsc.connect(subGain);
+            subGain.connect(ctx.destination);
+            subOsc.type = 'triangle';
+            subOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+            subGain.gain.setValueAtTime(0.2, now + idx * 0.1);
+            subGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.3);
+            subOsc.start(now + idx * 0.1);
+            subOsc.stop(now + idx * 0.1 + 0.3);
+          });
+        }
+      } catch (e) {
+        console.warn("Audio playback not ready:", e);
+      }
+    }
+
+    // Text to Speech for English Pronunciation
+    function speakText(text) {
+      playSound('click');
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.85; // Slightly slower for language learners
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      const icon = document.getElementById('audioIcon');
+      if (isMuted) {
+        icon.className = 'fa-solid fa-volume-xmark text-rose-500';
+      } else {
+        icon.className = 'fa-solid fa-volume-high';
+        playSound('click');
+      }
+    }
+
+    function addScore(addedExp, addedCoins) {
+      exp += addedExp;
+      coins += addedCoins;
+      document.getElementById('playerExp').innerText = exp;
+      document.getElementById('playerCoins').innerText = coins;
+    }
+
+    /* ==========================================================
+       2. TAB NAVIGATION SYSTEM
+       ========================================================== */
+    function switchTab(tabId) {
+      playSound('click');
+      const views = ['adventure', 'explore', 'match', 'decor', 'exam'];
+      views.forEach(v => {
+        const viewEl = document.getElementById(`view-${v}`);
+        const tabBtn = document.getElementById(`tab-${v}`);
+        if (v === tabId) {
+          viewEl.classList.remove('hidden');
+          if (v === 'adventure') {
+            tabBtn.className = "tab-btn flex-1 py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-md font-bold";
+          } else {
+            tabBtn.className = "tab-btn flex-1 py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 bg-white text-indigo-600 shadow-sm font-semibold";
+          }
+        } else {
+          viewEl.classList.add('hidden');
+          tabBtn.className = "tab-btn flex-1 py-2.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-indigo-600 font-semibold";
+        }
+      });
+    }
+
+    /* ==========================================================
+       2.1. PROFESSIONAL CAMPAIGN & LEVELING ADVENTURE SYSTEM
+       ========================================================== */
+    const campaignStages = [
+      {
+        id: 1,
+        title: "Level 1: The Front Yard & Garage",
+        subtitle: "Novice Inspector",
+        icon: "🚗",
+        minStarsNeeded: 0,
+        unlocked: true,
+        starsEarned: 0,
+        desc: "Kenali kendaraan dan perkakas luar rumah sebelum melangkah masuk.",
+        steps: [
+          {
+            prompt: "What vehicle is typically kept safe inside the garage to protect it from rain?",
+            clue: "🚗 🏍️ 🚲",
+            options: ["A car or motorcycle", "A dining table", "A bathtub", "A refrigerator"],
+            answer: 0,
+            speak: "What vehicle is typically kept safe inside the garage?"
+          },
+          {
+            prompt: "Where do we usually keep flowers, trees, and water the plants?",
+            clue: "🪴 🌳 🌸",
+            options: ["In the bedroom", "In the garden", "In the wardrobe", "In the living room"],
+            answer: 1,
+            speak: "Where do we usually keep flowers and water the plants?"
+          },
+          {
+            prompt: "Choose the correct preposition: 'The bicycle is parked ... the garage.'",
+            clue: "🚲 ➡️ 🏠",
+            options: ["inside", "above the sky", "under the water", "between the clouds"],
+            answer: 0,
+            speak: "The bicycle is parked inside the garage."
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Level 2: Living Room Detective",
+        subtitle: "Cozy Observer",
+        icon: "🛋️",
+        minStarsNeeded: 2,
+        unlocked: false,
+        starsEarned: 0,
+        desc: "Selesaikan investigasi ruang keluarga dan kenali fungsi furnitur santai.",
+        steps: [
+          {
+            prompt: "Which furniture in the living room is a comfortable long seat for two or more people?",
+            clue: "🛋️",
+            options: ["Sofa", "Stove", "Shower", "Toothbrush"],
+            answer: 0,
+            speak: "Which furniture in the living room is a comfortable long seat?"
+          },
+          {
+            prompt: "Where do we usually put the coffee cup while sitting on the sofa?",
+            clue: "☕ 🛋️",
+            options: ["On the coffee table", "In the wardrobe", "Inside the sink", "On the roof"],
+            answer: 0,
+            speak: "On the coffee table."
+          },
+          {
+            prompt: "Complete the sentence: 'We watch the evening news together on the ... in the living room.'",
+            clue: "📺",
+            options: ["Curtain", "Television", "Mirror", "Frying pan"],
+            answer: 1,
+            speak: "We watch the evening news together on the television."
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Level 3: Master Kitchen Cook",
+        subtitle: "Culinary Detective",
+        icon: "🍳",
+        minStarsNeeded: 4,
+        unlocked: false,
+        starsEarned: 0,
+        desc: "Cari tahu perabot penting untuk memasak dan menjaga kesegaran makanan.",
+        steps: [
+          {
+            prompt: "Where does Mother keep the milk, eggs, and fruits cold and fresh?",
+            clue: "🧊 🥛 🍎",
+            options: ["In the refrigerator", "In the desk lamp", "On the carpet", "In the toolbox"],
+            answer: 0,
+            speak: "In the refrigerator."
+          },
+          {
+            prompt: "Which utensil is used to fry sunny-side-up eggs on the stove?",
+            clue: "🍳 🔥",
+            options: ["Frying pan", "Blanket", "Pillow", "Toothpaste"],
+            answer: 0,
+            speak: "Frying pan."
+          },
+          {
+            prompt: "Where do we wash greasy plates and spoons after eating?",
+            clue: "🚰 🍽️",
+            options: ["In the sink", "Inside the wardrobe", "In the garden pot", "On the bed"],
+            answer: 0,
+            speak: "In the sink."
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Level 4: Night Sanctuary",
+        subtitle: "Rest & Hygiene Expert",
+        icon: "🛏️",
+        minStarsNeeded: 7,
+        unlocked: false,
+        starsEarned: 0,
+        desc: "Pahami perbedaan dan benda-benda esensial di Kamar Tidur dan Kamar Mandi.",
+        steps: [
+          {
+            prompt: "You feel sleepy at night. You put your head on a soft ... and pull the blanket.",
+            clue: "☁️ 🛏️",
+            options: ["Pillow", "Stove", "Watering can", "Carpet"],
+            answer: 0,
+            speak: "Pillow."
+          },
+          {
+            prompt: "Before going to sleep, you wash your face and brush your teeth with ... in the bathroom.",
+            clue: "🪥 🚿",
+            options: ["Toothbrush and toothpaste", "Fork and knife", "Blender and spoon", "Lamp and pencil"],
+            answer: 0,
+            speak: "Toothbrush and toothpaste."
+          },
+          {
+            prompt: "Where are clean school uniforms and jackets stored neatly?",
+            clue: "🚪 👔",
+            options: ["In the wardrobe", "In the bathtub", "In the oven", "Under the lawn mower"],
+            answer: 0,
+            speak: "In the wardrobe."
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Level 5: Grand House Architect",
+        subtitle: "Boss Level: Master Inspector",
+        icon: "🏰",
+        minStarsNeeded: 10,
+        unlocked: false,
+        starsEarned: 0,
+        desc: "Level Final! Buktikan penguasaan seluruh ruangan, fungsi, dan preposisi.",
+        steps: [
+          {
+            prompt: "Dialogue: 'Why is there water on the bathroom floor?' - 'Because someone just took a ...'",
+            clue: "🚿 🧼",
+            options: ["shower", "cooking lesson", "nap on bed", "drive in garage"],
+            answer: 0,
+            speak: "Because someone just took a shower."
+          },
+          {
+            prompt: "Identify the odd one out (Benda yang TIDAK semestinya ada di Dining Room):",
+            clue: "🍽️ ❓",
+            options: ["Motorcycle", "Dining table", "Chairs", "Water jug"],
+            answer: 0,
+            speak: "Motorcycle."
+          },
+          {
+            prompt: "Grammar check: Which sentence correctly describes a house with multiple rooms?",
+            clue: "🏠 📝",
+            options: [
+              "There are three bedrooms and two bathrooms in my house.",
+              "There is three bedrooms and two bathrooms in my house.",
+              "There are a kitchen in my house.",
+              "There is many pillows on the bed."
+            ],
+            answer: 0,
+            speak: "There are three bedrooms and two bathrooms in my house."
+          }
+        ]
+      }
+    ];
+
+    const badgesData = [
+      { id: "badge_first_star", name: "First Step", desc: "Dapatkan Bintang Pertama di Adventure", icon: "⭐", unlocked: false },
+      { id: "badge_decor_master", name: "Tidy Specialist", desc: "Selesaikan Room Decorator tanpa salah", icon: "🧹", unlocked: false },
+      { id: "badge_speed_racer", name: "Speedster", desc: "Capai skor 60+ di Speed Quiz", icon: "⚡", unlocked: false },
+      { id: "badge_house_master", name: "Grand Inspector", desc: "Tamatkan seluruh 5 Level Adventure", icon: "👑", unlocked: false }
+    ];
+
+    let currentActiveStage = null;
+    let currentStageStepIndex = 0;
+    let currentStageCorrectAnswers = 0;
+    let stageTimerInterval = null;
+    let stageSecondsRemaining = 15;
+
+    function renderAdventureMap() {
+      const container = document.getElementById('stagesMapContainer');
+      container.innerHTML = '';
+
+      let totalStars = 0;
+      campaignStages.forEach(st => {
+        totalStars += st.starsEarned;
+      });
+      document.getElementById('totalStarsEarned').innerText = totalStars;
+
+      // Check unlocking next levels based on stars
+      campaignStages.forEach((stage, idx) => {
+        if (idx === 0) {
+          stage.unlocked = true;
+        } else {
+          stage.unlocked = totalStars >= stage.minStarsNeeded;
+        }
+      });
+
+      // Update Player Level & Rank
+      updatePlayerRank(totalStars);
+
+      campaignStages.forEach(stage => {
+        const card = document.createElement('div');
+        const isLocked = !stage.unlocked;
+
+        card.className = `relative rounded-2xl p-4 border transition-all duration-300 flex flex-col justify-between ${
+          isLocked 
+            ? 'bg-slate-50 border-slate-200 opacity-60' 
+            : 'bg-white hover:border-indigo-400 hover:shadow-lg shadow-sm border-slate-200 cursor-pointer group'
+        }`;
+
+        let starsHtml = '';
+        for (let s = 1; s <= 3; s++) {
+          starsHtml += s <= stage.starsEarned 
+            ? '<i class="fa-solid fa-star text-amber-400 text-xs"></i>' 
+            : '<i class="fa-regular fa-star text-slate-300 text-xs"></i>';
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-10 h-10 rounded-xl ${isLocked ? 'bg-slate-200 text-slate-400' : 'bg-indigo-100 group-hover:scale-110'} flex items-center justify-center text-xl transition-transform">
+                ${isLocked ? '<i class="fa-solid fa-lock text-sm"></i>' : stage.icon}
+              </span>
+              <div class="flex gap-0.5">${starsHtml}</div>
+            </div>
+            <div class="text-[10px] font-black uppercase text-indigo-600 tracking-wider">${stage.subtitle}</div>
+            <h4 class="text-sm font-bold text-slate-800 leading-tight mt-0.5">${stage.title}</h4>
+            <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">${stage.desc}</p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            ${
+              isLocked 
+                ? `<span class="text-[10px] text-slate-400 font-semibold"><i class="fa-solid fa-star text-amber-400"></i> Butuh ${stage.minStarsNeeded} ★</span>` 
+                : `<button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 rounded-xl transition shadow-sm">
+                    ${stage.starsEarned > 0 ? 'Main Lagi' : 'Mulai Level'}
+                   </button>`
+            }
+          </div>
+        `;
+
+        if (!isLocked) {
+          card.onclick = () => openStageMission(stage);
+        }
+
+        container.appendChild(card);
+      });
+
+      renderBadges();
+    }
+
+    function updatePlayerRank(totalStars) {
+      const rankPill = document.getElementById('rankLevelPill');
+      const playerRankBadge = document.getElementById('playerRankBadge');
+      const playerTitleTag = document.getElementById('playerTitleTag');
+      const avatarEmoji = document.getElementById('avatarEmoji');
+      const advExpBar = document.getElementById('advExpBar');
+
+      let lvl = 1;
+      let title = "Junior Trainee";
+      let avatar = "🕵️‍♂️";
+
+      if (totalStars >= 12) {
+        lvl = 5;
+        title = "Grand Architect";
+        avatar = "👑";
+        unlockBadge('badge_house_master');
+      } else if (totalStars >= 8) {
+        lvl = 4;
+        title = "Senior Inspector";
+        avatar = "🧐";
+      } else if (totalStars >= 5) {
+        lvl = 3;
+        title = "Cozy Detective";
+        avatar = "🧭";
+      } else if (totalStars >= 2) {
+        lvl = 2;
+        title = "Apprentice Scout";
+        avatar = "🔍";
+      }
+
+      if (totalStars >= 1) {
+        unlockBadge('badge_first_star');
+      }
+
+      rankPill.innerText = `LVL ${lvl}`;
+      playerRankBadge.innerText = `Lvl ${lvl}`;
+      playerTitleTag.innerText = title;
+      avatarEmoji.innerText = avatar;
+
+      const percentage = Math.min(100, Math.round((totalStars / 15) * 100));
+      advExpBar.style.width = `${Math.max(15, percentage)}%`;
+    }
+
+    function renderBadges() {
+      const container = document.getElementById('badgesContainer');
+      container.innerHTML = '';
+
+      badgesData.forEach(b => {
+        const badgeEl = document.createElement('div');
+        badgeEl.className = `p-3 rounded-2xl border flex items-center gap-2.5 transition ${
+          b.unlocked 
+            ? 'bg-amber-50/70 border-amber-300 text-amber-950 shadow-sm' 
+            : 'bg-slate-50 border-slate-200 text-slate-400 opacity-60'
+        }`;
+        badgeEl.innerHTML = `
+          <div class="text-2xl">${b.icon}</div>
+          <div>
+            <div class="text-xs font-bold leading-tight">${b.name}</div>
+            <div class="text-[10px] text-slate-500">${b.desc}</div>
+          </div>
+        `;
+        container.appendChild(badgeEl);
+      });
+    }
+
+    function unlockBadge(badgeId) {
+      const found = badgesData.find(b => b.id === badgeId);
+      if (found && !found.unlocked) {
+        found.unlocked = true;
+        renderBadges();
+      }
+    }
+
+    function openStageMission(stage) {
+      playSound('click');
+      currentActiveStage = stage;
+      currentStageStepIndex = 0;
+      currentStageCorrectAnswers = 0;
+
+      document.getElementById('stagePlayIcon').innerText = stage.icon;
+      document.getElementById('stagePlayTag').innerText = stage.subtitle;
+      document.getElementById('stagePlayTitle').innerText = stage.title;
+
+      document.getElementById('stagePlayBody').classList.remove('hidden');
+      document.getElementById('stageCompleteView').classList.add('hidden');
+      document.getElementById('stageGameplayModal').classList.remove('hidden');
+
+      loadStageStep();
+    }
+
+    function closeStageModal() {
+      clearInterval(stageTimerInterval);
+      document.getElementById('stageGameplayModal').classList.add('hidden');
+      renderAdventureMap();
+    }
+
+    function loadStageStep() {
+      clearInterval(stageTimerInterval);
+      const stage = currentActiveStage;
+      if (currentStageStepIndex >= stage.steps.length) {
+        finishStageMission();
+        return;
+      }
+
+      const step = stage.steps[currentStageStepIndex];
+      document.getElementById('stageStepCounter').innerText = `Tantangan ${currentStageStepIndex + 1} dari ${stage.steps.length}`;
+      document.getElementById('stageMissionPrompt').innerText = step.prompt;
+
+      // Clue & speech button
+      const clueBox = document.getElementById('stageClueContainer');
+      clueBox.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="text-3xl bg-slate-100 p-2 rounded-xl">${step.clue}</div>
+          <button onclick="speakText('${step.speak.replace(/'/g, "\\'")}')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1 transition">
+            <i class="fa-solid fa-volume-high"></i> Dengarkan Kalimat
+          </button>
+        </div>
+      `;
+
+      // Render Options
+      const choicesGrid = document.getElementById('stageChoicesGrid');
+      choicesGrid.innerHTML = '';
+
+      step.options.forEach((opt, optIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full text-left p-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/50 text-slate-800 text-xs font-semibold flex items-center justify-between transition active:scale-[0.99]';
+        btn.innerHTML = `
+          <span><strong class="text-indigo-600 mr-2">${String.fromCharCode(65 + optIdx)}.</strong> ${opt}</span>
+          <i class="fa-regular fa-circle text-slate-300"></i>
+        `;
+        btn.onclick = () => submitStageAnswer(optIdx, btn);
+        choicesGrid.appendChild(btn);
+      });
+
+      // Timer 15s
+      stageSecondsRemaining = 15;
+      document.getElementById('stageTimerDisplay').innerText = `${stageSecondsRemaining}s`;
+      stageTimerInterval = setInterval(() => {
+        stageSecondsRemaining--;
+        document.getElementById('stageTimerDisplay').innerText = `${stageSecondsRemaining}s`;
+        if (stageSecondsRemaining <= 0) {
+          clearInterval(stageTimerInterval);
+          playSound('wrong');
+          // Proceed to next step automatically
+          currentStageStepIndex++;
+          loadStageStep();
+        }
+      }, 1000);
+    }
+
+    function submitStageAnswer(chosenIndex, btnElem) {
+      clearInterval(stageTimerInterval);
+      const step = currentActiveStage.steps[currentStageStepIndex];
+      const allBtns = document.getElementById('stageChoicesGrid').querySelectorAll('button');
+      allBtns.forEach(b => b.disabled = true);
+
+      if (chosenIndex === step.answer) {
+        playSound('correct');
+        currentStageCorrectAnswers++;
+        addScore(15, 5);
+        btnElem.className = 'w-full text-left p-3 rounded-xl border border-emerald-500 bg-emerald-500 text-white text-xs font-bold flex items-center justify-between shadow';
+        btnElem.querySelector('i').className = 'fa-solid fa-circle-check text-white';
+      } else {
+        playSound('wrong');
+        btnElem.className = 'w-full text-left p-3 rounded-xl border border-rose-500 bg-rose-500 text-white text-xs font-bold flex items-center justify-between';
+        btnElem.querySelector('i').className = 'fa-solid fa-circle-xmark text-white';
+        // Highlight correct one
+        allBtns[step.answer].className = 'w-full text-left p-3 rounded-xl border border-emerald-400 bg-emerald-100 text-emerald-900 text-xs font-bold flex items-center justify-between';
+      }
+
+      setTimeout(() => {
+        currentStageStepIndex++;
+        loadStageStep();
+      }, 1000);
+    }
+
+    function finishStageMission() {
+      clearInterval(stageTimerInterval);
+      document.getElementById('stagePlayBody').classList.add('hidden');
+      document.getElementById('stageCompleteView').classList.remove('hidden');
+
+      const totalSteps = currentActiveStage.steps.length;
+      let stars = 1;
+      if (currentStageCorrectAnswers === 3) stars = 3;
+      else if (currentStageCorrectAnswers === 2) stars = 2;
+
+      // Update stage stars if higher
+      if (stars > currentActiveStage.starsEarned) {
+        currentActiveStage.starsEarned = stars;
+      }
+
+      // Render stars visual
+      const starsContainer = document.getElementById('stageResultStars');
+      starsContainer.innerHTML = '';
+      for (let i = 1; i <= 3; i++) {
+        starsContainer.innerHTML += i <= stars 
+          ? '<i class="fa-solid fa-star text-amber-400 animate-bounce"></i>' 
+          : '<i class="fa-regular fa-star text-slate-300"></i>';
+      }
+
+      const gainedXp = stars * 25;
+      const gainedCoins = stars * 10;
+      addScore(gainedXp, gainedCoins);
+
+      document.getElementById('stageAwardExp').innerText = `+${gainedXp} XP`;
+      document.getElementById('stageAwardCoins').innerText = `+${gainedCoins}`;
+
+      playSound('fanfare');
+      if (window.confetti) confetti();
+    }
+
+    function resetCampaignProgress() {
+      campaignStages.forEach((s, idx) => {
+        s.starsEarned = 0;
+        s.unlocked = idx === 0;
+      });
+      badgesData.forEach(b => b.unlocked = false);
+      renderAdventureMap();
+      showModal('Progress Direset', 'Semua level petualangan telah diatur ulang ke tahap awal.', '🔄');
+    }
+
+    /* ==========================================================
+       3. TOPIC DATA: ROOMS & VOCABULARY (FASE D SMP)
+       ========================================================== */
+    const houseRoomsData = [
+      {
+        id: "living-room",
+        name: "Living Room",
+        indo: "Ruang Tamu / Keluarga",
+        emoji: "🛋️",
+        desc: "A spacious room for relaxing, welcoming guests, talking with family, or watching TV together.",
+        items: [
+          { name: "Sofa", indo: "Sofa empuk", phonetic: "/ˈsoʊ.fə/", icon: "🛋️" },
+          { name: "Television", indo: "Televisi", phonetic: "/ˈtel.ə.vɪʒ.ən/", icon: "📺" },
+          { name: "Coffee table", indo: "Meja tamu", phonetic: "/ˈkɑː.fi ˌteɪ.bəl/", icon: "☕" },
+          { name: "Carpet", indo: "Karpet", phonetic: "/ˈkɑːr.pət/", icon: "🧶" },
+          { name: "Curtain", indo: "Gorden / Tirai", phonetic: "/ˈkɝː.tən/", icon: "🪟" },
+          { name: "Floor lamp", indo: "Lampu sudut", phonetic: "/flɔːr læmp/", icon: "💡" }
+        ]
+      },
+      {
+        id: "bedroom",
+        name: "Bedroom",
+        indo: "Kamar Tidur",
+        emoji: "🛏️",
+        desc: "A private cozy room where you sleep at night, study, and keep your clothes.",
+        items: [
+          { name: "Bed", indo: "Tempat tidur", phonetic: "/bed/", icon: "🛏️" },
+          { name: "Pillow", indo: "Bantal", phonetic: "/ˈpɪl.oʊ/", icon: "☁️" },
+          { name: "Blanket", indo: "Selimut", phonetic: "/ˈblæŋ.kɪt/", icon: "🧣" },
+          { name: "Wardrobe", indo: "Lemari pakaian", phonetic: "/ˈwɔːr.droʊb/", icon: "🚪" },
+          { name: "Desk lamp", indo: "Lampu belajar", phonetic: "/desk læmp/", icon: "💡" },
+          { name: "Alarm clock", indo: "Jam weker", phonetic: "/əˈlɑːrm klɑːk/", icon: "⏰" }
+        ]
+      },
+      {
+        id: "kitchen",
+        name: "Kitchen",
+        indo: "Dapur",
+        emoji: "🍳",
+        desc: "The designated room equipped with appliances to prepare and cook delicious food.",
+        items: [
+          { name: "Stove", indo: "Kompor", phonetic: "/stoʊv/", icon: "🔥" },
+          { name: "Refrigerator", indo: "Kulkas", phonetic: "/rɪˈfrɪdʒ.ə.reɪ.t̬ɚ/", icon: "🧊" },
+          { name: "Frying pan", indo: "Wajan penggorengan", phonetic: "/ˈfraɪ.ɪŋ pæn/", icon: "🍳" },
+          { name: "Blender", indo: "Blender", phonetic: "/ˈblen.dɚ/", icon: "🍹" },
+          { name: "Knife", indo: "Pisau dapur", phonetic: "/naɪf/", icon: "🔪" },
+          { name: "Sink", indo: "Bak cuci piring", phonetic: "/sɪŋk/", icon: "🚰" }
+        ]
+      },
+      {
+        id: "bathroom",
+        name: "Bathroom",
+        indo: "Kamar Mandi",
+        emoji: "🚿",
+        desc: "A clean room where you take a refreshing bath, wash your hands, and brush your teeth.",
+        items: [
+          { name: "Shower", indo: "Pancuran air", phonetic: "/ˈʃaʊ.ɚ/", icon: "🚿" },
+          { name: "Towel", indo: "Handuk", phonetic: "/ˈtaʊ.əl/", icon: "🧖" },
+          { name: "Toothbrush", indo: "Sikat gigi", phonetic: "/ˈtuːθ.brʌʃ/", icon: "🪥" },
+          { name: "Soap", indo: "Sabun mandi", phonetic: "/soʊp/", icon: "🧼" },
+          { name: "Mirror", indo: "Cermin", phonetic: "/ˈmɪr.ɚ/", icon: "🪞" },
+          { name: "Shampoo", indo: "Sampo", phonetic: "/ʃæmˈpuː/", icon: "🧴" }
+        ]
+      },
+      {
+        id: "dining-room",
+        name: "Dining Room",
+        indo: "Ruang Makan",
+        emoji: "🍽️",
+        desc: "The room adjacent to the kitchen where the family gathers together to eat meals.",
+        items: [
+          { name: "Dining table", indo: "Meja makan", phonetic: "/ˈdaɪ.nɪŋ ˌteɪ.bəl/", icon: "🍽️" },
+          { name: "Chair", indo: "Kursi", phonetic: "/tʃer/", icon: "🪑" },
+          { name: "Plate", indo: "Piring makan", phonetic: "/pleɪt/", icon: "🍽️" },
+          { name: "Spoon and fork", indo: "Sendok dan garpu", phonetic: "/spuːn ænd fɔːrk/", icon: "🍴" },
+          { name: "Water jug", indo: "Teko air minum", phonetic: "/ˈwɑː.t̬ɚ dʒʌɡ/", icon: "🍶" }
+        ]
+      },
+      {
+        id: "garage",
+        name: "Garage",
+        indo: "Garasi",
+        emoji: "🚗",
+        desc: "A sheltered part of the house used for parking vehicles like cars and motorcycles safely.",
+        items: [
+          { name: "Car", indo: "Mobil", phonetic: "/kɑːr/", icon: "🚗" },
+          { name: "Motorcycle", indo: "Sepeda motor", phonetic: "/ˈmoʊ.t̬ɚˌsaɪ.kəl/", icon: "🏍️" },
+          { name: "Bicycle", indo: "Sepeda", phonetic: "/ˈbaɪ.sə.kəl/", icon: "🚲" },
+          { name: "Toolbox", indo: "Kotak perkakas", phonetic: "/ˈtuːl.bɑːks/", icon: "🧰" },
+          { name: "Helmet", indo: "Helm", phonetic: "/ˈhel.mət/", icon: "⛑️" }
+        ]
+      },
+      {
+        id: "garden",
+        name: "Garden",
+        indo: "Kebun / Halaman",
+        emoji: "🌳",
+        desc: "The outdoor green area around the house with flowers, grass, plants, and fresh air.",
+        items: [
+          { name: "Flower pot", indo: "Pot bunga", phonetic: "/ˈflaʊ.ɚ pɑːt/", icon: "🪴" },
+          { name: "Watering can", indo: "Penyiram tanaman", phonetic: "/ˈwɑː.t̬ɚ.ɪŋ kæn/", icon: "🫗" },
+          { name: "Lawn mower", indo: "Mesin pemotong rumput", phonetic: "/ˈlɑːn ˌmoʊ.ɚ/", icon: "🚜" },
+          { name: "Hose", indo: "Selang air", phonetic: "/hoʊz/", icon: "➰" }
+        ]
+      }
+    ];
+
+    let currentSelectedRoom = houseRoomsData[0];
+
+    function initRoomExplorer() {
+      const container = document.getElementById('roomButtonsContainer');
+      container.innerHTML = '';
+
+      houseRoomsData.forEach((room, index) => {
+        const btn = document.createElement('button');
+        btn.id = `btn-room-${room.id}`;
+        const isActive = index === 0;
+        btn.className = `flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-xs font-bold gap-1 ${
+          isActive 
+            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200' 
+            : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50'
+        }`;
+        btn.innerHTML = `
+          <span class="text-2xl">${room.emoji}</span>
+          <span class="truncate w-full text-center">${room.name}</span>
+        `;
+        btn.onclick = () => selectRoom(room.id);
+        container.appendChild(btn);
+      });
+
+      renderRoomDetail(currentSelectedRoom);
+    }
+
+    function selectRoom(roomId) {
+      playSound('click');
+      const found = houseRoomsData.find(r => r.id === roomId);
+      if (!found) return;
+      currentSelectedRoom = found;
+
+      // Update button visual styles
+      houseRoomsData.forEach(r => {
+        const el = document.getElementById(`btn-room-${r.id}`);
+        if (el) {
+          if (r.id === roomId) {
+            el.className = 'flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-xs font-bold gap-1 bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200';
+          } else {
+            el.className = 'flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-xs font-bold gap-1 bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50';
+          }
+        }
+      });
+
+      renderRoomDetail(currentSelectedRoom);
+    }
+
+    function renderRoomDetail(room) {
+      document.getElementById('roomEmoji').innerText = room.emoji;
+      document.getElementById('roomTitle').innerText = room.name;
+      document.getElementById('roomTranslation').innerText = room.indo;
+      document.getElementById('roomDescription').innerText = room.desc;
+      document.getElementById('vocabCounter').innerText = `${room.items.length} Vocabulary Items`;
+
+      const listContainer = document.getElementById('vocabListContainer');
+      listContainer.innerHTML = '';
+
+      room.items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'bg-white p-3 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer flex items-center justify-between group';
+        card.onclick = () => {
+          speakText(item.name);
+          addScore(2, 1);
+        };
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-2xl bg-slate-100 p-2 rounded-xl group-hover:scale-110 transition-transform">${item.icon}</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                ${item.name}
+                <span class="text-[10px] text-indigo-500 font-mono font-normal">${item.phonetic}</span>
+              </div>
+              <div class="text-xs text-slate-500">${item.indo}</div>
+            </div>
+          </div>
+          <div class="w-8 h-8 rounded-xl bg-slate-100 group-hover:bg-indigo-600 group-hover:text-white text-slate-500 flex items-center justify-center transition-colors">
+            <i class="fa-solid fa-volume-high text-xs"></i>
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    function speakCurrentRoom() {
+      speakText(currentSelectedRoom.name);
+    }
+
+    /* ==========================================================
+       4. GAMIFIED QUIZ (SPEED MATCH QUIZ)
+       ========================================================== */
+    const quizQuestions = [
+      {
+        category: "Room Function",
+        question: "Mother is frying eggs and making chicken soup. Where is she right now?",
+        options: ["In the Kitchen", "In the Garage", "In the Bedroom", "In the Bathroom"],
+        answer: 0,
+        tip: "Cooking always takes place in the kitchen!"
+      },
+      {
+        category: "Furniture Vocabulary",
+        question: "Which of the following objects is most commonly found in the BEDROOM?",
+        options: ["Stove", "Pillow and Blanket", "Toothbrush", "Lawn mower"],
+        answer: 1,
+        tip: "Pillow and blanket help you sleep comfortably."
+      },
+      {
+        category: "Room Function",
+        question: "Father parks his car and keeps the toolbox safe in the ...",
+        options: ["Dining room", "Living room", "Garage", "Garden"],
+        answer: 2,
+        tip: "Garage is a place to park vehicles."
+      },
+      {
+        category: "Everyday English",
+        question: "We usually welcome guests and sit on the comfortable sofa in the ...",
+        options: ["Living room", "Bathroom", "Kitchen", "Attic"],
+        answer: 0,
+        tip: "Living room is used for entertaining visitors."
+      },
+      {
+        category: "Bathroom Items",
+        question: "You want to brush your teeth before going to sleep. You need ...",
+        options: ["Spoon and plate", "Toothbrush and toothpaste", "Frying pan", "Wardrobe"],
+        answer: 1,
+        tip: "Toothbrush is for cleaning teeth in the bathroom."
+      },
+      {
+        category: "Dining Room",
+        question: "The whole family gathers together to have dinner around the ...",
+        options: ["Dining table", "Carpet in garage", "Bathtub", "Bed"],
+        answer: 0,
+        tip: "Dining table is where food is served for meals."
+      },
+      {
+        category: "Outdoor Parts",
+        question: "Rani is watering colorful roses and orchids outside the house. She is in the ...",
+        options: ["Bedroom", "Garden", "Kitchen", "Dining room"],
+        answer: 1,
+        tip: "Flowers grow outdoors in the garden."
+      },
+      {
+        category: "Preposition & Item",
+        question: "Where do you usually put milk and vegetables to keep them fresh and cold?",
+        options: ["In the wardrobe", "In the refrigerator", "Under the pillow", "Inside the mailbox"],
+        answer: 1,
+        tip: "A refrigerator keeps food cool and fresh."
+      }
+    ];
+
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+    let quizLives = 3;
+    let quizTimer = null;
+    let quizTimeLeft = 15;
+
+    function startQuiz() {
+      currentQuizIndex = 0;
+      quizScore = 0;
+      quizLives = 3;
+      document.getElementById('quizScoreBadge').innerText = `Skor: ${quizScore}`;
+      updateQuizLivesDisplay();
+
+      document.getElementById('quizStartScreen').classList.add('hidden');
+      document.getElementById('quizEndScreen').classList.add('hidden');
+      document.getElementById('quizPlayScreen').classList.remove('hidden');
+
+      loadQuizQuestion();
+    }
+
+    function updateQuizLivesDisplay() {
+      const container = document.getElementById('quizLives');
+      container.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('i');
+        heart.className = i < quizLives 
+          ? 'fa-solid fa-heart text-base text-rose-500' 
+          : 'fa-regular fa-heart text-base text-slate-300';
+        container.appendChild(heart);
+      }
+    }
+
+    function loadQuizQuestion() {
+      clearInterval(quizTimer);
+      if (currentQuizIndex >= quizQuestions.length) {
+        finishQuiz();
+        return;
+      }
+
+      const q = quizQuestions[currentQuizIndex];
+      document.getElementById('questionCategory').innerText = q.category;
+      document.getElementById('quizQuestionText').innerText = `"${q.question}"`;
+      document.getElementById('quizQuestionNumber').innerText = `Pertanyaan ${currentQuizIndex + 1} dari ${quizQuestions.length}`;
+
+      const optionsGrid = document.getElementById('quizOptionsGrid');
+      optionsGrid.innerHTML = '';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full text-left p-3.5 rounded-2xl border border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/40 text-slate-800 text-xs md:text-sm font-semibold transition-all flex items-center justify-between active:scale-[0.98]';
+        btn.innerHTML = `
+          <span><strong class="text-indigo-600 mr-2">${String.fromCharCode(65 + idx)}.</strong> ${opt}</span>
+          <i class="fa-regular fa-circle text-slate-300 text-xs"></i>
+        `;
+        btn.onclick = () => handleQuizAnswer(idx, btn);
+        optionsGrid.appendChild(btn);
+      });
+
+      // Start timer
+      quizTimeLeft = 15;
+      const timerBar = document.getElementById('quizTimerBar');
+      timerBar.style.width = '100%';
+      timerBar.className = 'bg-gradient-to-r from-emerald-400 to-indigo-500 h-2.5 rounded-full transition-all duration-1000';
+
+      quizTimer = setInterval(() => {
+        quizTimeLeft--;
+        const percentage = (quizTimeLeft / 15) * 100;
+        timerBar.style.width = `${percentage}%`;
+
+        if (quizTimeLeft <= 5) {
+          timerBar.className = 'bg-gradient-to-r from-amber-500 to-rose-500 h-2.5 rounded-full transition-all duration-1000';
+        }
+
+        if (quizTimeLeft <= 0) {
+          clearInterval(quizTimer);
+          playSound('wrong');
+          quizLives--;
+          updateQuizLivesDisplay();
+          if (quizLives <= 0) {
+            finishQuiz(true);
+          } else {
+            currentQuizIndex++;
+            loadQuizQuestion();
+          }
+        }
+      }, 1000);
+    }
+
+    function handleQuizAnswer(selectedIndex, clickedBtn) {
+      clearInterval(quizTimer);
+      const q = quizQuestions[currentQuizIndex];
+      const allButtons = document.getElementById('quizOptionsGrid').querySelectorAll('button');
+
+      allButtons.forEach(btn => btn.disabled = true);
+
+      if (selectedIndex === q.answer) {
+        playSound('correct');
+        quizScore += 10;
+        addScore(15, 5);
+        document.getElementById('quizScoreBadge').innerText = `Skor: ${quizScore}`;
+        clickedBtn.classList.remove('bg-white', 'border-slate-200');
+        clickedBtn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'shadow-md');
+        clickedBtn.querySelector('i').className = 'fa-solid fa-circle-check text-white';
+      } else {
+        playSound('wrong');
+        quizLives--;
+        updateQuizLivesDisplay();
+        clickedBtn.classList.remove('bg-white', 'border-slate-200');
+        clickedBtn.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+        clickedBtn.querySelector('i').className = 'fa-solid fa-circle-xmark text-white';
+
+        // Highlight right answer
+        allButtons[q.answer].classList.remove('bg-white', 'border-slate-200');
+        allButtons[q.answer].classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-400');
+      }
+
+      setTimeout(() => {
+        if (quizLives <= 0) {
+          finishQuiz(true);
+        } else {
+          currentQuizIndex++;
+          loadQuizQuestion();
+        }
+      }, 1200);
+    }
+
+    function finishQuiz(isGameOver = false) {
+      clearInterval(quizTimer);
+      document.getElementById('quizPlayScreen').classList.add('hidden');
+      document.getElementById('quizEndScreen').classList.remove('hidden');
+
+      const titleEl = document.getElementById('quizResultTitle');
+      const descEl = document.getElementById('quizResultDesc');
+      const iconEl = document.getElementById('quizResultIcon');
+      const finalScoreEl = document.getElementById('quizFinalScore');
+
+      finalScoreEl.innerText = quizScore;
+
+      if (isGameOver) {
+        playSound('wrong');
+        iconEl.innerText = '💔';
+        titleEl.innerText = 'Kesempatan Habis!';
+        descEl.innerText = 'Jangan berkecil hati! Pelajari kembali nama-nama ruangan di Room Explorer dan coba lagi.';
+      } else {
+        playSound('fanfare');
+        if (window.confetti) confetti();
+        iconEl.innerText = quizScore >= 70 ? '🏆' : '🌟';
+        titleEl.innerText = quizScore >= 70 ? 'Luar Biasa, Expert!' : 'Bagus Sekali!';
+        descEl.innerText = `Kamu berhasil menjawab dengan skor ${quizScore} dari total 80 poin maksimal!`;
+      }
+    }
+
+    /* ==========================================================
+       5. ROOM DECORATOR / CATEGORIZATION (MINI-GAME)
+       ========================================================== */
+    const decoratorData = [
+      { id: "item1", name: "Toothpaste", room: "bathroom", icon: "🪥" },
+      { id: "item2", name: "Frying Pan", room: "kitchen", icon: "🍳" },
+      { id: "item3", name: "Cozy Pillow", room: "bedroom", icon: "☁️" },
+      { id: "item4", name: "Television", room: "living-room", icon: "📺" },
+      { id: "item5", name: "Watering Can", room: "garden", icon: "🪴" },
+      { id: "item6", name: "Helmet", room: "garage", icon: "⛑️" }
+    ];
+
+    let selectedDecoratorItem = null;
+    let placedCount = 0;
+
+    function initDecoratorGame() {
+      placedCount = 0;
+      selectedDecoratorItem = null;
+      const unplacedBox = document.getElementById('unplacedItemsBox');
+      unplacedBox.innerHTML = '';
+
+      decoratorData.forEach(item => {
+        const itemBtn = document.createElement('button');
+        itemBtn.id = `decor-${item.id}`;
+        itemBtn.className = 'decor-item bg-white border border-slate-300 hover:border-indigo-500 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm active:scale-95 transition-all';
+        itemBtn.innerHTML = `<span>${item.icon}</span> <span>${item.name}</span>`;
+        itemBtn.onclick = () => selectDecoratorItem(item, itemBtn);
+        unplacedBox.appendChild(itemBtn);
+      });
+
+      document.getElementById('decorItemsRemaining').innerText = `${decoratorData.length} Benda tersisa`;
+
+      // Render 6 room drop areas
+      const targetRoomsContainer = document.getElementById('targetRoomsContainer');
+      targetRoomsContainer.innerHTML = '';
+
+      const gameRooms = [
+        { id: "living-room", title: "Living Room", icon: "🛋️" },
+        { id: "bedroom", title: "Bedroom", icon: "🛏️" },
+        { id: "kitchen", title: "Kitchen", icon: "🍳" },
+        { id: "bathroom", title: "Bathroom", icon: "🚿" },
+        { id: "garage", title: "Garage", icon: "🚗" },
+        { id: "garden", title: "Garden", icon: "🌳" }
+      ];
+
+      gameRooms.forEach(room => {
+        const roomCard = document.createElement('div');
+        roomCard.className = 'border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/70 p-4 rounded-2xl flex flex-col justify-between transition-all min-h-[140px] cursor-pointer';
+        roomCard.id = `room-slot-${room.id}`;
+        roomCard.onclick = () => attemptPlaceItem(room.id);
+        roomCard.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-200/60 pb-2 mb-2">
+            <span class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <span>${room.icon}</span> ${room.title}
+            </span>
+            <span class="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full font-semibold">Ruangan</span>
+          </div>
+          <div id="placed-in-${room.id}" class="flex flex-wrap gap-1.5 min-h-[50px] items-center">
+            <span class="text-[11px] text-slate-400 italic font-normal placeholder-label">Ketuk di sini untuk menempatkan benda...</span>
+          </div>
+        `;
+        targetRoomsContainer.appendChild(roomCard);
+      });
+    }
+
+    function selectDecoratorItem(item, btnElement) {
+      playSound('click');
+      selectedDecoratorItem = item;
+      document.querySelectorAll('.decor-item').forEach(b => {
+        b.classList.remove('ring-2', 'ring-indigo-500', 'bg-indigo-50', 'border-indigo-500');
+      });
+      btnElement.classList.add('ring-2', 'ring-indigo-500', 'bg-indigo-50', 'border-indigo-500');
+    }
+
+    function attemptPlaceItem(targetRoomId) {
+      if (!selectedDecoratorItem) {
+        showModal('Perhatian', 'Pilih benda di kotak perabot terlebih dahulu sebelum memilih ruangan tujuannya!', '💡');
+        return;
+      }
+
+      if (selectedDecoratorItem.room === targetRoomId) {
+        // Correct Placement
+        playSound('correct');
+        addScore(15, 5);
+        const itemElem = document.getElementById(`decor-${selectedDecoratorItem.id}`);
+        if (itemElem) itemElem.remove();
+
+        const slotContainer = document.getElementById(`placed-in-${targetRoomId}`);
+        const placeholder = slotContainer.querySelector('.placeholder-label');
+        if (placeholder) placeholder.remove();
+
+        const badge = document.createElement('span');
+        badge.className = 'bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 animate-bounce';
+        badge.innerHTML = `${selectedDecoratorItem.icon} ${selectedDecoratorItem.name} <i class="fa-solid fa-check text-[10px]"></i>`;
+        slotContainer.appendChild(badge);
+
+        placedCount++;
+        const remaining = decoratorData.length - placedCount;
+        document.getElementById('decorItemsRemaining').innerText = remaining > 0 ? `${remaining} Benda tersisa` : 'Semua ruangan rapi!';
+
+        selectedDecoratorItem = null;
+
+        if (placedCount === decoratorData.length) {
+          playSound('fanfare');
+          if (window.confetti) confetti();
+          unlockBadge('badge_decor_master');
+          setTimeout(() => {
+            showModal('Rumah Bersih & Rapi!', 'Selamat! Kamu telah menata semua perabot di ruangan yang tepat. Badge "Tidy Specialist" terbuka!', '🏆');
+          }, 400);
+        }
+      } else {
+        // Wrong Placement
+        playSound('wrong');
+        showModal('Salah Ruangan!', `Benda "${selectedDecoratorItem.name}" biasanya tidak diletakkan di ruangan tersebut. Coba pilih ruangan lain!`, '❌');
+      }
+    }
+
+    function resetDecoratorGame() {
+      playSound('click');
+      initDecoratorGame();
+    }
+
+    /* ==========================================================
+       6. SUMMATIVE ASSESSMENT (10 BUTIR SOAL & DIGITAL CERTIFICATE)
+       ========================================================== */
+    const summativeExamQuestions = [
+      {
+        q: "1. Which sentence describes the function of a 'Bedroom' correctly?",
+        options: [
+          "A room where we cook meals and wash the dishes.",
+          "A room where we park motorcycles and bicycles.",
+          "A private room for sleeping, resting, and studying.",
+          "A place outside the house to plant trees and grass."
+        ],
+        a: 2
+      },
+      {
+        q: "2. Look at this sentence: 'Father is brewing a cup of hot coffee on the stove.' Where is Father?",
+        options: ["In the Kitchen", "In the Garden", "In the Bathroom", "In the Garage"],
+        a: 0
+      },
+      {
+        q: "3. Which object is NOT typically found in a bathroom?",
+        options: ["Shower", "Towel", "Toothbrush", "Sofa"],
+        a: 3
+      },
+      {
+        q: "4. The word 'Wardrobe' in Indonesian means ...",
+        options: ["Meja belajar", "Lemari pakaian", "Tempat tidur", "Kulkas dua pintu"],
+        a: 1
+      },
+      {
+        q: "5. 'My brother is washing his hands in the sink before having dinner.' The underlined word 'sink' means ...",
+        options: ["Wajan penggorengan", "Bak cuci / wastafel", "Piring saji", "Pintu gerbang"],
+        a: 1
+      },
+      {
+        q: "6. Which part of the house is located OUTSIDE and usually filled with flowers and green grass?",
+        options: ["Dining room", "Garden", "Kitchen", "Living room"],
+        a: 1
+      },
+      {
+        q: "7. Complete the dialogue:<br>Doni: 'Where can I find the dictionary?'<br>Maya: 'It is ... the study desk in my bedroom.'",
+        options: ["on", "under the ground", "between the cloud", "inside the sink"],
+        a: 0
+      },
+      {
+        q: "8. What is the main purpose of a 'Garage'?",
+        options: [
+          "To entertain visiting friends and family.",
+          "To prepare lunch and bake cakes.",
+          "To shelter and park vehicles like cars and motorcycles.",
+          "To take a shower and brush teeth."
+        ],
+        a: 2
+      },
+      {
+        q: "9. 'Plate, spoon, fork, and drinking glasses' are tableware commonly set on the ...",
+        options: ["Dining table", "Carpet in garage", "Bathtub", "Roof"],
+        a: 0
+      },
+      {
+        q: "10. In Kurikulum Merdeka Fase D, which sentence is grammatically correct to describe your house?",
+        options: [
+          "There are a big kitchen in my house.",
+          "There is three sofas in the living room.",
+          "There are two bedrooms and one bathroom in my house.",
+          "There is many pillows on my bed."
+        ],
+        a: 2
+      }
+    ];
+
+    function startExam() {
+      const name = document.getElementById('studentNameInput').value.trim();
+      if (!name) {
+        showModal('Nama Belum Diisi', 'Silakan tuliskan nama lengkap kamu terlebih dahulu sebelum memulai ujian!', '✏️');
+        return;
+      }
+
+      playSound('click');
+      document.getElementById('examCandidateName').innerText = `Nama Siswa: ${name}`;
+      document.getElementById('examIntroSection').classList.add('hidden');
+      document.getElementById('examFormSection').classList.remove('hidden');
+
+      const listContainer = document.getElementById('examQuestionsList');
+      listContainer.innerHTML = '';
+
+      summativeExamQuestions.forEach((item, index) => {
+        const qBlock = document.createElement('div');
+        qBlock.className = 'bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs md:text-sm space-y-3';
+        
+        let optionsHtml = '';
+        item.options.forEach((opt, optIdx) => {
+          optionsHtml += `
+            <label class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-indigo-50/60 cursor-pointer transition border border-transparent hover:border-indigo-100">
+              <input type="radio" name="exam_q_${index}" value="${optIdx}" class="mt-0.5 text-indigo-600 focus:ring-indigo-500">
+              <span class="text-slate-700 leading-snug"><strong class="text-indigo-600">${String.fromCharCode(65 + optIdx)}.</strong> ${opt}</span>
+            </label>
+          `;
+        });
+
+        qBlock.innerHTML = `
+          <div class="font-bold text-slate-800 leading-relaxed">${item.q}</div>
+          <div class="space-y-1 pl-1">${optionsHtml}</div>
+        `;
+        listContainer.appendChild(qBlock);
+      });
+    }
+
+    function cancelExam() {
+      playSound('click');
+      document.getElementById('examFormSection').classList.add('hidden');
+      document.getElementById('examIntroSection').classList.remove('hidden');
+    }
+
+    function submitExam() {
+      // Check completeness
+      let answeredCount = 0;
+      let rawScore = 0;
+
+      summativeExamQuestions.forEach((item, index) => {
+        const selected = document.querySelector(`input[name="exam_q_${index}"]:checked`);
+        if (selected) {
+          answeredCount++;
+          if (parseInt(selected.value) === item.a) {
+            rawScore++;
+          }
+        }
+      });
+
+      if (answeredCount < summativeExamQuestions.length) {
+        showModal('Belum Selesai', `Kamu baru menjawab ${answeredCount} dari 10 soal. Mohon lengkapi semua butir pertanyaan!`, '⚠️');
+        return;
+      }
+
+      const finalGrade = rawScore * 10;
+      playSound('fanfare');
+      if (window.confetti) confetti();
+
+      // Populate Certificate
+      const studentName = document.getElementById('studentNameInput').value.trim();
+      const studentClass = document.getElementById('studentClassInput').value.trim();
+      const studentSchool = document.getElementById('studentSchoolInput').value.trim();
+
+      document.getElementById('certStudentName').innerText = studentName;
+      document.getElementById('certStudentClass').innerText = `${studentClass} • ${studentSchool}`;
+      document.getElementById('certFinalGrade').innerText = finalGrade;
+
+      let predicate = "MEMUASKAN";
+      if (finalGrade >= 90) predicate = "SANGAT BAIK (A)";
+      else if (finalGrade >= 75) predicate = "BAIK (B)";
+      else predicate = "CUKUP (C)";
+
+      document.getElementById('certPredicate').innerText = predicate;
+
+      const now = new Date();
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('certDateDisplay').innerText = `Tanggal: ${now.toLocaleDateString('id-ID', options)}`;
+
+      document.getElementById('examFormSection').classList.add('hidden');
+      document.getElementById('examResultSection').classList.remove('hidden');
+    }
+
+    function retakeExam() {
+      playSound('click');
+      document.getElementById('examResultSection').classList.add('hidden');
+      document.getElementById('examIntroSection').classList.remove('hidden');
+    }
+
+    /* ==========================================================
+       7. GENERIC DIALOG / FEEDBACK MODAL (No alert())
+       ========================================================== */
+    function showModal(title, msg, icon = '💡') {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalMessage').innerText = msg;
+      document.getElementById('modalIcon').innerText = icon;
+      const modal = document.getElementById('feedbackModal');
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      playSound('click');
+      document.getElementById('feedbackModal').classList.add('hidden');
+    }
+
+    /* ==========================================================
+       8. ONLOAD INITIALIZATION
+       ========================================================== */
+    window.onload = function() {
+      renderAdventureMap();
+      initRoomExplorer();
+      initDecoratorGame();
+    };
+  </script>
+</body>
+</html>
